@@ -6,8 +6,12 @@ from pdfminer.converter import TextConverter
 from pdfminer.pdfpage import PDFPage
 from pdfminer.pdfinterp import PDFPageInterpreter
 from pdfminer.pdfinterp import PDFResourceManager
+from pdfminer.high_level import extract_pages
 
-pdf = "C:/Users/Данил/rag-progect/Трудовой кодекс Российской Федерации от 30.12.2001 N 197-ФЗ.pdf"
+PDF = "C:/Users/Данил/rag-progect/Трудовой кодекс Российской Федерации от 30.12.2001 N 197-ФЗ.pdf"
+
+with open(PDF, "rb") as file:
+    PAGES = sum(1 for _ in PDFPage.get_pages(file))
 
 def pdf_text_converter(pdf_path, pages):
     with open(pdf_path, "rb") as file:
@@ -47,19 +51,17 @@ def remove_header_first_page(page_text):
         raise ValueError("Колонтитул не найден на странице: ")
 
 def extract_text(pdf_path, pages):
+    pages_text = []
     for index, page in enumerate(pdf_text_converter(pdf_path, pages)):
-        if index == 0:
-            try:
+        try:
+            if index == 0:
                 text = remove_header_first_page(page)
-                print(text)
-            except ValueError as e:
-                print(e, index + 1)
-        else:
-            try:
+            else:
                 text = remove_header(page)
-                print(text)
-            except ValueError as e:
-                print(e, index + 1)
+            pages_text.append(text.rstrip())
+        except ValueError as e:
+            print(e, index + 1)
+    return "".join(pages_text)
 
-
-extract_text(pdf, 30)
+print(f"Количество страниц в документе: {PAGES}")
+print(extract_text(PDF, PAGES))
