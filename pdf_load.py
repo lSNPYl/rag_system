@@ -28,27 +28,38 @@ def pdf_text_converter(pdf_path, pages):
         io_string.close()
 
 
-#
+
 
 def remove_header(page_text):
-    re_colontitul = r'\S\w+(?: \w+){3}\S \w{2} \d{2}\.\d{2}\.\d{4} \w \d{3}-\w{2} \(\w{3}\. \w{2} \d{2}\.\d{2}\.\d{4}, \w \w{3}\. \w{2} \d{2}\.\d{2}\.\d{4}\)(?: \w+){5}: \d{2}\.\d{2}\.\d{4}\s+(\w+ ){4}www\.\w+\.ru \w+ \d+ \w{2} \d{3} \d'
+    re_colontitul = r'.*? КонсультантПлюс.*?www\.consultant\.ru.*?Страница \d*? из \d* \d+'
     text_wc = re.sub(re_colontitul, "", page_text)
-    return text_wc
+    if page_text != text_wc:
+        return text_wc
+    else:
+        raise ValueError("Колонтитул не найден на странице: ")
 
 def remove_header_first_page(page_text):
-    re_colontitul_first_page = r'(?: \w+){3}\s+www\.\w+\.ru\s+w+ \w+: d{2}\.\d{2}\.\d{4}'
+    re_colontitul_first_page = r'Документ.*?КонсультантПлюс.*?www\.consultant\.ru.*?Дата сохранения:.+'
     text_wc = re.sub(re_colontitul_first_page, "", page_text)
-    return text_wc
+    if page_text != text_wc:
+        return text_wc
+    else:
+        raise ValueError("Колонтитул не найден на странице: ")
 
 def extract_text(pdf_path, pages):
     for index, page in enumerate(pdf_text_converter(pdf_path, pages)):
-        print(index)
         if index == 0:
-            text = remove_header_first_page(page)
-            print(text)
+            try:
+                text = remove_header_first_page(page)
+                print(text)
+            except ValueError as e:
+                print(e, index + 1)
         else:
-            text = remove_header(page)
-            print(text)
+            try:
+                text = remove_header(page)
+                print(text)
+            except ValueError as e:
+                print(e, index + 1)
 
 
-extract_text(pdf, 5)
+extract_text(pdf, 30)
